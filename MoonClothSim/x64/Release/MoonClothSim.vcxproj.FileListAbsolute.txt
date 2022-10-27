@@ -1,0 +1,2 @@
+C:\Users\User\source\repos\MoonClothSim\x64\Release\MoonClothSim.lib
+C:\Users\User\Documents\GitHub\RealtimeClothSimulationinUE4\MoonClothSim\x64\Release\MoonClothSim.lib
