@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "cuda_test.h"
+#include "cuda_runtime.h"
 #include "GameFramework/Actor.h"
+#include "DrawDebugHelpers.h"
 #include "CUDATESTACTOR.generated.h"
 
 UCLASS()
@@ -14,6 +17,42 @@ class MYCLOTHSIMULATION_API ACUDATESTACTOR : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ACUDATESTACTOR();
+
+    UFUNCTION(BlueprintCallable, Category = "CUDATest")
+        bool SimpleCUDATest() {
+        // ----- addWithCuda test -----
+        const int arraySize = 5;
+        const int a[arraySize] = { 1, 2, 3, 4, 5 };
+        const int b[arraySize] = { 10, 20, 30, 40, 50 };
+        int c[arraySize] = { 0 };
+        std::string error_message;
+
+        // Add vectors in parallel.
+        cudaError_t cuda_status = addWithCuda(c, a, b, arraySize, &error_message);
+        if (cuda_status != cudaSuccess) {
+            UE_LOG(LogTemp, Warning, TEXT("addWithCuda failed!\n"));
+            UE_LOG(LogTemp, Warning, TEXT("%s"), *FString(error_message.c_str()));
+            return false;
+        }
+        UE_LOG(LogTemp, Warning, TEXT("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}"), c[0], c[1], c[2], c[3], c[4]);
+
+        // ----- addWithCuda2 test -----
+        const int4 a_int4 = make_int4(1, 2, 3, 4);
+        const int4 b_int4 = make_int4(10, 20, 30, 40);
+        int4 c_int4;
+
+        // Add vectors in parallel.
+        cuda_status = addWithCuda2(&c_int4, &a_int4, &b_int4, &error_message);
+        if (cuda_status != cudaSuccess) {
+            UE_LOG(LogTemp, Warning, TEXT("addWithCuda failed!\n"));
+            UE_LOG(LogTemp, Warning, TEXT("%s"), *FString(error_message.c_str()));
+            return false;
+        }
+        UE_LOG(LogTemp, Warning, TEXT("{1,2,3,4} + {10,20,30,40} = {%d,%d,%d,%d}"), c_int4.x, c_int4.y, c_int4.z, c_int4.w);
+        UWorld* world = GetWorld();
+        DrawDebugLine(world, GetActorLocation(), GetActorLocation(), FColor(255, 0, 0));
+        return true;
+    }
 
 protected:
 	// Called when the game starts or when spawned

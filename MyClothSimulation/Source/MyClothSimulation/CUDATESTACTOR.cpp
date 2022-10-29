@@ -3,6 +3,8 @@
 
 #include "CUDATESTACTOR.h"
 
+
+FVector plus(10, 10, 10);
 // Sets default values
 ACUDATESTACTOR::ACUDATESTACTOR()
 {
@@ -15,13 +17,14 @@ ACUDATESTACTOR::ACUDATESTACTOR()
 void ACUDATESTACTOR::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ACUDATESTACTOR::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	UWorld* world = GetWorld();
+	DrawDebugLine(world, GetActorLocation(), GetActorLocation() + plus, FColor(255, 0, 0));
+	plus += FVector(1, 1, 1);
 }
 
