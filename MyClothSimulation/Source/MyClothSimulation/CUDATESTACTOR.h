@@ -7,6 +7,7 @@
 #include "cuda_runtime.h"
 #include "GameFramework/Actor.h"
 #include "DrawDebugHelpers.h"
+#include "MoonClothComponent.h"
 #include "CUDATESTACTOR.generated.h"
 
 UCLASS()
@@ -61,5 +62,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Cloth")
+    UMoonClothComponent* Cloth;
 };
