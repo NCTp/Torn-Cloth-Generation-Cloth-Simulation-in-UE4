@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MoonClothComponent.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
@@ -30,20 +29,23 @@ void UMoonClothComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	// Recreate Editor Cloth State, at PIE Time.
 	UWorld* world = GetWorld();
 	if (world->IsPlayInEditor())
 	{
 		StaticToProcedural();
 	}
 
-	// Prop Updates
 	m_sm->SetVisibility(bShowStaticMesh);
 }
 
 void UMoonClothComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	UWorld* world = GetWorld();
+	for (int32 i = 0; i < m_smData.vert_count - 1; ++i)
+	{
+		DrawDebugLine(world, Particles[i].Position, Particles[i+1].Position, FColor(255, 0, 0));
+	}
 
 }
 
@@ -62,9 +64,8 @@ void UMoonClothComponent::StaticToProcedural()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Mesh Founded"));
 	}
-	
 	FStaticMeshLODResources* lod0 = *(sm->RenderData->LODResources.GetData());
-	
+
 	m_smData.vb = &(lod0->VertexBuffers.PositionVertexBuffer); // Position Vertex Buffer (Position)
 	m_smData.smvb = &(lod0->VertexBuffers.StaticMeshVertexBuffer); // Static Mesh Buffer (Static Mesh)
 	m_smData.cvb = &(lod0->VertexBuffers.ColorVertexBuffer); // Color Vertex Buffer (Color)
@@ -73,11 +74,12 @@ void UMoonClothComponent::StaticToProcedural()
 	m_smData.vert_count = m_smData.vb->GetNumVertices(); // Vertex Counts
 	m_smData.ind_count = m_smData.ib->GetNumIndices(); // Index Counts
 	m_smData.tri_count = m_smData.ind_count / 3; // Triangle Counts
+	particleCount = m_smData.vert_count;
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%d"), m_smData.vert_count));
 	
 	UE_LOG(LogTemp, Warning, TEXT("DBG::Static Mesh Vertex Count == %d | Index Count = %d"), m_smData.vert_count, m_smData.ind_count);
 
-	
+	// Initialize smData Arrays
 	m_smData.Pos.AddDefaulted(m_smData.vert_count); 
 	m_smData.Col.AddDefaulted(m_smData.vert_count); 
 	m_smData.Normal.AddDefaulted(m_smData.vert_count); 
@@ -101,15 +103,12 @@ void UMoonClothComponent::StaticToProcedural()
 		m_smData.has_col == true ? m_smData.Col[i] = m_smData.cvb->VertexColor(i) : m_smData.Col[i] = FColor(255, 255, 255);
 		m_smData.has_uv == true ? m_smData.UV[i] = m_smData.smvb->GetVertexUV(i, 0) : m_smData.UV[i] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
 		
-		// Particle Init
+		// Particle Initialize
 		FVector vertPtPos = GetComponentLocation() + m_smData.vb->VertexPosition(i); // Pts With Component Location Offset
-		/*
-		Particles[i].Position = vertPtPos, Particles[i].PrevPosition = vertPtPos;
-		
+		Particles[i].Position = vertPtPos;
+		Particles[i].PrevPosition = vertPtPos;
 		Particles[i].ID = i;
 		lod0->bHasColorVertexData == true ? Particles[i].Col = m_smData.cvb->VertexColor(i) : Particles[i].Col = FColor(255, 255, 255);
-		*/
-		
 	}
 	
 	for (int32 i = 0; i < m_smData.ind_count; i++)
@@ -122,7 +121,5 @@ void UMoonClothComponent::StaticToProcedural()
 	bShowStaticMesh = false;
 	m_sm->SetVisibility(bShowStaticMesh);
 	clothStateExists = true;
-	
-
 	
 }

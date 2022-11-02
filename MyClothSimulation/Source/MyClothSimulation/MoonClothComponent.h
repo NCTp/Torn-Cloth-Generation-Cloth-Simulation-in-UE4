@@ -10,11 +10,11 @@
  * 
  */
 class  HashGrid;
-struct FVerletClothConstraint;
+struct FMoonClothConstraint;
 
-struct FVerletClothParticle
+struct FMoonClothParticle
 {
-	FVerletClothParticle()
+	FMoonClothParticle()
 		: Position(0, 0, 0)
 		, PrevPosition(0, 0, 0)
 		, Force(0, 0, 0)
@@ -85,10 +85,10 @@ public:
 private:
 
 	// --- Cloth Data ---
-	TArray<FVerletClothParticle> Particles;
-	TArray<FVerletClothConstraint> Constraints;
+	TArray<FMoonClothParticle> Particles;
+	TArray<FMoonClothConstraint> Constraints;
 	TArray<FVector> Normals;
-	TArray<FVerletClothParticle*> VolSamplePts;
+	TArray<FMoonClothParticle*> VolSamplePts;
 	float restVolume, curVolume, deltaVolume;
 	int32 particleCount;
 
@@ -97,9 +97,9 @@ private:
 
 
 };
-struct FVerletClothConstraint
+struct FMoonClothConstraint
 {
-	FVerletClothConstraint(FVerletClothParticle& Pt_0, FVerletClothParticle& Pt_1, UMoonClothComponent* cloth)
+	FMoonClothConstraint(FMoonClothParticle& Pt_0, FMoonClothParticle& Pt_1, UMoonClothComponent* cloth)
 		: Pt0(Pt_0), Pt1(Pt_1), Cloth(cloth)
 	{
 		// Get Particles Corresponding Vertices Orginal Postions and Rest Length.
@@ -108,9 +108,9 @@ struct FVerletClothConstraint
 		// ID to Identify Particle/Vertex ID Pair of Constraint. 
 		conID = Pt_0.ID * Pt_1.ID;
 	}
-	FVerletClothConstraint() = delete;
+	FMoonClothConstraint() = delete;
 
-	FVerletClothParticle& Pt0, & Pt1;
+	FMoonClothParticle& Pt0, & Pt1;
 	FVector orgP0, orgP1;
 	float restLength;
 	int32 conID;
