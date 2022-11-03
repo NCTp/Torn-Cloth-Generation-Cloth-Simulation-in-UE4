@@ -1,5 +1,3 @@
-﻿// Copyright SCIEMENT, Inc.
-// by Hirofumi Seo, M.D., CEO & President
 
 #include "cuda_test.h"
 
