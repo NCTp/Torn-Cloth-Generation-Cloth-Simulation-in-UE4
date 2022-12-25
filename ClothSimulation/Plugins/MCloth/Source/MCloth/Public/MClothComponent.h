@@ -14,25 +14,138 @@ struct FClothParticle
 	FClothParticle() :
 		Position(0.0f, 0.0f, 0.0f),
 		PrevPosition(0.0f, 0.0f, 0.0f),
+		NextPosition(new FVector(0.0f, 0.0f, 0.0f)),
 		Normal(0.0f, 0.0f, 0.0f),
 		Velocity(0.0f, 0.0f, 0.0f),
-		Force(0.0f, 0.0f, 0.0f),
+		ForceAcum(0.0f, 0.0f, 0.0f),
 		mass(1.0f),
 		k(10.0f),
 		bFree(false)
 	{}
 	FVector Position;
 	FVector PrevPosition;
+	FVector *NextPosition;
 	FVector Normal;
 	FVector Velocity;
-	FVector Force;
+	FVector ForceAcum;
 
 	float mass = 1.0f;
 	float k; // Spring Constant
 
 	bool bFree;
 	
+	virtual ~FClothParticle()
+	{
+
+	}
+
+	void SetPosition(FVector newPos)
+	{
+		this->Position = newPos;
+	}
+
+	void ClearForces()
+	{
+		ForceAcum = FVector(0.0f, 0.0f, 0.0f);
+	}
+
+	void AddForce(FVector Force)
+	{
+		ForceAcum += Force;
+	}
+
+	FVector* VerletIntegration()
+	{
+		NextPosition->X = (2 * this->Position.X) - this->PrevPosition.X + this->ForceAcum.X * 0.1f * 0.1f;
+		NextPosition->Y = (2 * this->Position.Y) - this->PrevPosition.Y + this->ForceAcum.Y * 0.1f * 0.1f;
+		NextPosition->Z = (2 * this->Position.Z) - this->PrevPosition.Z + this->ForceAcum.Z * 0.1f * 0.1f;
+
+		return NextPosition;
+	}
+
+	void Update()
+	{
+		this->Velocity = this->ForceAcum * 0.1f;
+
+		FVector tempX = this->Position;
+
+		FVector* NextPos = VerletIntegration();
+
+		this->PrevPosition = tempX;
+	}
 	
+};
+
+struct FClothTriangle
+{
+public:
+
+	FClothParticle* particles[2];
+	FVector* Normal;
+
+	FClothTriangle() :
+		Normal(new FVector)
+	{}
+	virtual ~FClothTriangle()
+	{
+
+	}
+
+	void SetTriangle(FClothParticle* p1, FClothParticle* p2, FClothParticle* p3)
+	{
+		particles[0] = p1;
+		particles[1] = p2;
+		particles[2] = p3;
+	}
+	void CalculateNormal()
+	{
+		FVector v1 = FVector(0.0f, 0.0f, 0.0f);
+		FVector v2 = FVector(0.0f, 0.0f, 0.0f);
+
+		v1 = particles[0]->Position - particles[1]->Position;
+		v2 = particles[0]->Position - particles[2]->Position;
+
+		Normal->X = v1.Y * v2.Z - v1.Z * v2.Y;
+		Normal->Y = v1.Z * v2.X - v1.X * v2.Z;
+		Normal->Z = v1.X * v2.Y - v1.Y * v2.X;
+	}
+
+};
+
+struct FClothSpring
+{
+public:
+	FClothParticle* P1;
+	FClothParticle* P2;
+	float ks;
+	float kd;
+	float normalLength;
+
+	FClothSpring(FClothParticle* p1, FClothParticle* p2, float NormalLength) :
+		P1(p1),
+		P2(p2),
+		ks(20),
+		kd(0.2f),
+		normalLength(NormalLength)
+	{}
+
+	virtual ~FClothSpring()
+	{
+	}
+
+	void Update(float KS, float KD)
+	{
+
+	}
+	void ApplySpringForce()
+	{
+
+	}
+	float GetLength()
+	{
+
+	}
+
 };
 UCLASS(hidecategories = (Object, LOD), editinlinenew, meta = (BlueprintSpawnableComponent), ClassGroup = Rendering, DisplayName = "MClothComponent")
 class MCLOTH_API UMClothComponent : public UProceduralMeshComponent

@@ -93,7 +93,9 @@ void UMClothComponent::UpdateProceduralMesh(bool Init)
 				ClothParticles[Index].Position = InitLocation;
 				ClothParticles[Index].Normal = FVector::UpVector;
 				ClothParticles[Index].bFree = !FixedParticleIndices.Contains(Index);
+
 				DrawDebugSphere(world, ClothParticles[Index].Position, 1, 3, FColor(255, 0, 0, 1), false, 3.0f);
+
 				Locations[Index] = InitLocation;
 				Normals[Index] = FVector::UpVector;
 				Colors[Index] = FColor(1.0f, 255.0f, 1.0f, 1.0f);
@@ -195,5 +197,5 @@ void UMClothComponent::ComputeNormals()
 void UMClothComponent::PerformSubstep(float InSubstepTime, const FVector& Gravity)
 {
 	//VerletIntegration(InSubstepTime, Gravity);
-	ComputeNormals();
+	//ComputeNormals();
 }
