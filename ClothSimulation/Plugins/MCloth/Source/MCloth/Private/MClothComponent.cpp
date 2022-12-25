@@ -8,6 +8,7 @@
 #define PrintString(String) GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White, String)
 #define SPHERE_RADIUS 100
 
+
 UMClothComponent::UMClothComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = true; bTickInEditor = true;
@@ -44,10 +45,12 @@ void UMClothComponent::OnRegister()
 void UMClothComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	PerformSubstep(FMath::Max(SubstepTime, 0.05f), FVector(0,0, GetWorld()->GetGravityZ() * ClothGravityScale));
 	
 	//TestParticle.AddForce(1.0f, 1.0f, 1.0f);
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f, %f, %f"), TestParticle.ForceAcum.X, TestParticle.ForceAcum.Y, TestParticle.ForceAcum.Z));
-	//VerletIntegration(FMath::Max(SubstepTime, 0.005f), FVector(0, 0, GetWorld()->GetGravityZ()) * ClothGravityScale);
+
 
 	UpdateProceduralMesh(false);
 }
@@ -140,41 +143,25 @@ void UMClothComponent::UpdateProceduralMesh(bool Init)
 		}
 		UpdateMeshSection(0, Locations, Normals, UVs, Colors, Tangents);
 		*/
-		ComputeNormals();
+		//ComputeNormals();
+		
 		for (int i = 0; i < HorizontalVertexCount; ++i)
 		{
 			for (int j = 0; j < VerticalVertexCount; ++j)
 			{
 				int32 Index = i * HorizontalVertexCount + j; // Index of each vertices
-				
-				ClothParticles[0].Position -= FVector(0.0f, 0.0f, 0.1f);
+				if (j % 2 == 0)
+					ClothParticles[Index].Position -= FVector(0.0f, 0.0f, 0.1f);
 				Locations[Index] = ClothParticles[Index].Position;
 				Normals[Index] = ClothParticles[Index].Normal;
 				Colors[Index] = FColor(1.0f, 255.0f, 1.0f, 1.0f);
+				DrawDebugSphere(world, ClothParticles[Index].Position, 1, 3, FColor(255, 0, 0, 1), false, 1.0f);
 			}
 		}
 		
 		UpdateMeshSection(0, Locations, Normals, UVs, Colors, Tangents);
 	}
 	
-}
-
-void UMClothComponent::VerletIntegration(float InSubstepTime, const FVector& Gravity)
-{
-	const float SubstepTimeSqr = InSubstepTime * InSubstepTime;
-	ParallelFor(ClothParticles.Num(), [&](int32 Index)
-		{
-			FClothParticle& Particle = ClothParticles[Index];
-
-			if (Particle.bFree)
-			{
-				const FVector DeltaLoc = Particle.Position - Particle.PrevPosition;
-				const FVector NewLoc = Particle.Position + DeltaLoc + (SubstepTimeSqr * Gravity);
-
-				Particle.PrevPosition = Particle.Position;
-				Particle.Position = NewLoc;
-			}
-		});
 }
 
 void UMClothComponent::ComputeNormals()
@@ -203,4 +190,10 @@ void UMClothComponent::ComputeNormals()
 				ClothParticles[Index].Normal *= -1;
 			}
 		});
+}
+
+void UMClothComponent::PerformSubstep(float InSubstepTime, const FVector& Gravity)
+{
+	//VerletIntegration(InSubstepTime, Gravity);
+	ComputeNormals();
 }

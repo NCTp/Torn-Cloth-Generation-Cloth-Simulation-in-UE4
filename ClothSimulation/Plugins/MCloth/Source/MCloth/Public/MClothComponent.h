@@ -49,6 +49,8 @@ public:
 	void UpdateProceduralMesh(bool init);
 	void VerletIntegration(float InSubstepTime, const FVector& Gravity);
 	void ComputeNormals();
+	void SolveConstraints();
+	void PerformSubstep(float InSubstepTime, const FVector& Gravity);
 
 
 public:
