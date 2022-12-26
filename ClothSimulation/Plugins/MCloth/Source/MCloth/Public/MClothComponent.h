@@ -14,7 +14,7 @@ struct FClothParticle
 	FClothParticle() :
 		Position(0.0f, 0.0f, 0.0f),
 		PrevPosition(0.0f, 0.0f, 0.0f),
-		NextPosition(new FVector(0.0f, 0.0f, 0.0f)),
+		NextPosition(0.0f, 0.0f, 0.0f),
 		Normal(0.0f, 0.0f, 0.0f),
 		Velocity(0.0f, 0.0f, 0.0f),
 		ForceAcum(0.0f, 0.0f, 0.0f),
@@ -24,7 +24,7 @@ struct FClothParticle
 	{}
 	FVector Position;
 	FVector PrevPosition;
-	FVector *NextPosition;
+	FVector NextPosition;
 	FVector Normal;
 	FVector Velocity;
 	FVector ForceAcum;
@@ -41,7 +41,7 @@ struct FClothParticle
 
 	void SetPosition(FVector newPos)
 	{
-		this->Position = newPos;
+		Position = newPos;
 	}
 
 	void ClearForces()
@@ -54,24 +54,26 @@ struct FClothParticle
 		ForceAcum += Force;
 	}
 
-	FVector* VerletIntegration()
+	FVector VerletIntegration()
 	{
-		NextPosition->X = (2 * this->Position.X) - this->PrevPosition.X + this->ForceAcum.X * 0.1f * 0.1f;
-		NextPosition->Y = (2 * this->Position.Y) - this->PrevPosition.Y + this->ForceAcum.Y * 0.1f * 0.1f;
-		NextPosition->Z = (2 * this->Position.Z) - this->PrevPosition.Z + this->ForceAcum.Z * 0.1f * 0.1f;
+		NextPosition.X = (2 * this->Position.X) - this->PrevPosition.X + this->ForceAcum.X * 0.02f * 0.02f;
+		NextPosition.Y = (2 * this->Position.Y) - this->PrevPosition.Y + this->ForceAcum.Y * 0.02f * 0.02f;
+		NextPosition.Z = (2 * this->Position.Z) - this->PrevPosition.Z + this->ForceAcum.Z * 0.02f * 0.02f;
 
 		return NextPosition;
 	}
 
 	void Update()
 	{
-		this->Velocity = this->ForceAcum * 0.1f;
+		Velocity = ForceAcum * 0.1f;
 
-		FVector tempX = this->Position;
+		FVector tempX = Position;
 
-		FVector* NextPos = VerletIntegration();
+		FVector NextPos = VerletIntegration();
 
-		this->PrevPosition = tempX;
+		Position = NextPos;
+
+		PrevPosition = tempX;
 	}
 	
 };
@@ -135,15 +137,35 @@ public:
 
 	void Update(float KS, float KD)
 	{
-
+		this->ks = KS;
+		this->kd = KD;
+		ApplySpringForce();
 	}
 	void ApplySpringForce()
 	{
+		FVector ePos = P2->Position - P1->Position;
+
+		//float length = FMath::Sqrt(FMath::Pow(Epos.X, 2) + FMath::Pow(Epos.Y, 2) + FMath::Pow(Epos.Z, 2));
+
+		ePos.Normalize();
+
+		float v1 = ePos.X * P1->Velocity.X * ePos.Y * P1->Velocity.Y + ePos.Z * P1->Velocity.Z;
+		float v2 = ePos.X * P2->Velocity.X * ePos.Y * P2->Velocity.Y + ePos.Z * P2->Velocity.Z;
+
+		float fSD = -ks * (normalLength - this->GetLength()) - kd * (v1 - v2);
+
+		FVector fPos = ePos * fSD;
+
+		P1->AddForce(fPos);
+		P2->AddForce(fPos);
 
 	}
 	float GetLength()
 	{
-
+		FVector dist = FVector(0.0f, 0.0f, 0.0f);
+		dist = P2->Position - P1->Position;
+		float length = FMath::Sqrt((dist.X * dist.X + dist.Y * dist.Y + dist.Z * dist.Z));
+		return length;
 	}
 
 };
