@@ -59,6 +59,12 @@ UVerletClothMeshComponent::UVerletClothMeshComponent(const FObjectInitializer& O
 
 	ParticleMass = 1.0f; ParticleRadius = 2.5f;
 
+	HorizontalVertexCount = 5;
+	VerticalVertexCount = 5;
+
+	HorizontalDistance = 10.0f;
+	VerticalDistance = 10.0f;
+
 	// smData init
 	smData.vb = nullptr, smData.cvb = nullptr, smData.smvb = nullptr, smData.ib = nullptr;
 }
@@ -156,18 +162,24 @@ void UVerletClothMeshComponent::BuildClothState()
 	smData.cvb  = &(lod0->VertexBuffers.ColorVertexBuffer); // Colour
 	smData.ib   = &(lod0->IndexBuffer); // Tri Inds
 
-	smData.vert_count = smData.vb->GetNumVertices(); 
-	smData.ind_count = smData.ib->GetNumIndices(); 
+	smData.vert_count = HorizontalVertexCount * VerticalVertexCount;
+	smData.ind_count = (HorizontalVertexCount - 1) * (VerticalVertexCount - 1) * 6;
 	smData.tri_count = smData.ind_count / 3;
 	particleCount = smData.vert_count;
-		
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("V: %i, I: %i"), smData.vb->GetNumVertices(), smData.ib->GetNumIndices()));
 	#ifdef DEBUG_PRINT_LOG
 	UE_LOG(LogTemp, Warning, TEXT("DBG::Static Mesh Vertex Count == %d | Index Count = %d"), smData.vert_count, smData.ind_count);
 	#endif
 
 	// Initalize smData Arrays. 
-	smData.Pos.AddDefaulted(smData.vert_count); smData.Col.AddDefaulted(smData.vert_count); smData.Normal.AddDefaulted(smData.vert_count); smData.Tang.AddDefaulted(smData.vert_count); smData.UV.AddDefaulted(smData.vert_count); 
-	smData.Ind.AddDefaulted(smData.ind_count); smData.Tris.AddDefaulted(smData.tri_count);
+	smData.Pos.AddDefaulted(smData.vert_count); 
+	smData.Col.AddDefaulted(smData.vert_count); 
+	smData.Normal.AddDefaulted(smData.vert_count); 
+	smData.Tang.AddDefaulted(smData.vert_count); 
+	smData.UV.AddDefaulted(smData.vert_count); 
+	smData.Ind.AddDefaulted(smData.ind_count); 
+	smData.Tris.AddDefaulted(smData.tri_count);
 	Particles.AddDefaulted(particleCount);
 
 	// Need to add checks to delete previous procedual mesh data if exists.
@@ -180,9 +192,9 @@ void UVerletClothMeshComponent::BuildClothState()
 	for (int32 i = 0; i < smData.vert_count; ++i)
 	{
 		// SMesh-ProcMesh Init
-		smData.Pos[i] = smData.vb->VertexPosition(i); // Pass Verts Without Component Location Offset initally.
-		smData.Normal[i] = smData.smvb->VertexTangentZ(i);
-		smData.Tang[i] = FProcMeshTangent(FVector(smData.smvb->VertexTangentX(i).X, smData.smvb->VertexTangentX(i).Y, smData.smvb->VertexTangentX(i).Z), false);
+		//smData.Pos[i] = smData.vb->VertexPosition(i); // Pass Verts Without Component Location Offset initally.
+		smData.Normal[i] = FVector::UpVector;
+		smData.Tang[i] = FProcMeshTangent(FVector::UpVector, false);
 		smData.has_col == true ?  smData.Col[i] = smData.cvb->VertexColor(i) : smData.Col[i] = FColor(255, 255, 255);
 		smData.has_uv == true  ?  smData.UV[i] = smData.smvb->GetVertexUV(i, 0) : smData.UV[i] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
 		UWorld* world = GetWorld();
@@ -191,6 +203,26 @@ void UVerletClothMeshComponent::BuildClothState()
 		Particles[i].Position = vertPtPos, Particles[i].PrevPosition = vertPtPos; 
 		Particles[i].ID = i;
 		lod0->bHasColorVertexData == true ? Particles[i].Col = smData.cvb->VertexColor(i) : Particles[i].Col = FColor(255, 255, 255);
+	}
+
+	for (int i = 0; i < HorizontalVertexCount; ++i)
+	{
+		for (int j = 0; j < VerticalVertexCount; ++j)
+		{
+			float LocX = i * HorizontalDistance;
+			float LocY = j * VerticalDistance;
+			float LocZ = 0.0f;
+
+			FVector InitLocation(LocX, LocY, LocZ);
+
+			int32 Index = i * HorizontalVertexCount + j;
+
+			smData.Pos[Index] = InitLocation;
+			//smData.Normal[Index] = FVector::UpVector;
+			FVector vertPtPos = GetComponentLocation() + smData.vb->VertexPosition(i); // Pts With Component Location Offset
+			Particles[i].Position = vertPtPos, Particles[i].PrevPosition = vertPtPos;
+			Particles[i].ID = i;
+		}
 	}
 	// Indices 
 	for (int32 i = 0; i < smData.ind_count; ++i) smData.Ind[i] = static_cast<int32>(smData.ib->GetIndex(i));

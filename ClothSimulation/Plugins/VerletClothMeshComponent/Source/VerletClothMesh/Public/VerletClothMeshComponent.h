@@ -126,6 +126,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cloth Simulation Debug")
 		bool bShow_Constraints;
 
+	// --- VerletCloth - Particle Setup ---
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 2), Category = "Cloth Geometry")
+		int32 HorizontalVertexCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 2), Category = "Cloth Geometry")
+		int32 VerticalVertexCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Cloth Geometry")
+		float HorizontalDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Cloth Geometry")
+		float VerticalDistance;
+
 	// --- Component UFunctions - Cloth Setup ---
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Cloth Simulation")
 	void BuildClothState();
