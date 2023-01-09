@@ -11,29 +11,38 @@
  */
 struct FClothParticle
 {
-	FClothParticle() :
-		Position(0.0f, 0.0f, 0.0f),
-		PrevPosition(0.0f, 0.0f, 0.0f),
-		NextPosition(0.0f, 0.0f, 0.0f),
-		Normal(0.0f, 0.0f, 0.0f),
-		Velocity(0.0f, 0.0f, 0.0f),
-		ForceAcum(0.0f, 0.0f, 0.0f),
-		mass(1.0f),
-		k(10.0f),
-		bFree(false)
-	{}
+
+	float mass;
+	int posI, posJ;
+	float dim; // size of particles
+	float boxRadius; //box to avoid internal collision
+	int numberOfAdjTriangles;
+	int adjTriangles[6];
+	int dampForce;
+
+	bool bIsFixed;
+
 	FVector Position;
 	FVector PrevPosition;
-	FVector NextPosition;
 	FVector Normal;
 	FVector Velocity;
 	FVector ForceAcum;
 
-	float mass = 1.0f;
-	float k; // Spring Constant
+	FClothParticle() :
+		Position(0.0f, 0.0f, 0.0f),
+		PrevPosition(0.0f, 0.0f, 0.0f),
+		Normal(0.0f, 0.0f, 0.0f),
+		Velocity(0.0f, 0.0f, 0.0f),
+		ForceAcum(0.0f, 0.0f, 0.0f),
+		mass(1.0f),
+		posI(0),
+		posJ(0),
+		numberOfAdjTriangles(0),
+		dim(5.0f),
+		dampForce(5.0f),
+		bIsFixed(false)
+	{}
 
-	bool bFree;
-	
 	virtual ~FClothParticle()
 	{
 
@@ -56,6 +65,8 @@ struct FClothParticle
 
 	FVector VerletIntegration()
 	{
+		FVector NextPosition = FVector();
+
 		NextPosition.X = (2 * this->Position.X) - this->PrevPosition.X + this->ForceAcum.X * 0.02f * 0.02f;
 		NextPosition.Y = (2 * this->Position.Y) - this->PrevPosition.Y + this->ForceAcum.Y * 0.02f * 0.02f;
 		NextPosition.Z = (2 * this->Position.Z) - this->PrevPosition.Z + this->ForceAcum.Z * 0.02f * 0.02f;
@@ -167,15 +178,16 @@ public:
 		float length = FMath::Sqrt((dist.X * dist.X + dist.Y * dist.Y + dist.Z * dist.Z));
 		return length;
 	}
-
 };
 UCLASS(hidecategories = (Object, LOD), editinlinenew, meta = (BlueprintSpawnableComponent), ClassGroup = Rendering, DisplayName = "MClothComponent")
 class MCLOTH_API UMClothComponent : public UProceduralMeshComponent
 {
 	GENERATED_BODY()
-	
+
+	typedef TArray<FClothParticle> ClothParticles_I;
 
 public:
+
 	UMClothComponent(const FObjectInitializer& ObjectInitializer);
 	virtual ~UMClothComponent();
 
@@ -187,6 +199,10 @@ public:
 	void SolveConstraints();
 	void PerformSubstep(float InSubstepTime, const FVector& Gravity);
 
+	//////////////// Wire
+	void AddParticle(FClothParticle Particle, int i, int j);
+	void GenerateTriangles(int resolution);
+	void Update(float ks, float kd);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 2), Category = "Cloth Geometry")
@@ -215,6 +231,17 @@ public:
 
 protected:
 	TArray<FClothParticle> ClothParticles;
+
+	TArray<ClothParticles_I> ClothParticles_J;
+	int numberOfParticles;
+
+	TArray<FClothTriangle> ClothTriangles;
+	int numberOfTriangles;
+
+	TArray<FClothSpring> ClothSprings;
+	int numberOfSprings;
+
+	
 
 protected:
 

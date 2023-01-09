@@ -92,7 +92,7 @@ void UMClothComponent::UpdateProceduralMesh(bool Init)
 
 				ClothParticles[Index].Position = InitLocation;
 				ClothParticles[Index].Normal = FVector::UpVector;
-				ClothParticles[Index].bFree = !FixedParticleIndices.Contains(Index);
+				ClothParticles[Index].bIsFixed = FixedParticleIndices.Contains(Index);
 
 				DrawDebugSphere(world, ClothParticles[Index].Position, 1, 3, FColor(255, 0, 0, 1), false, 3.0f);
 

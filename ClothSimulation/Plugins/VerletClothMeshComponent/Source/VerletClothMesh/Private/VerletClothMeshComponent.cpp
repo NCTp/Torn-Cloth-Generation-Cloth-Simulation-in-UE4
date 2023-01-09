@@ -185,7 +185,7 @@ void UVerletClothMeshComponent::BuildClothState()
 		smData.Tang[i] = FProcMeshTangent(FVector(smData.smvb->VertexTangentX(i).X, smData.smvb->VertexTangentX(i).Y, smData.smvb->VertexTangentX(i).Z), false);
 		smData.has_col == true ?  smData.Col[i] = smData.cvb->VertexColor(i) : smData.Col[i] = FColor(255, 255, 255);
 		smData.has_uv == true  ?  smData.UV[i] = smData.smvb->GetVertexUV(i, 0) : smData.UV[i] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
-		
+		UWorld* world = GetWorld();
 		// Particle Init
 		FVector vertPtPos = GetComponentLocation() + smData.vb->VertexPosition(i); // Pts With Component Location Offset
 		Particles[i].Position = vertPtPos, Particles[i].PrevPosition = vertPtPos; 
@@ -546,7 +546,7 @@ void UVerletClothMeshComponent::GetVolSamplePts(int32 n)
 	#ifdef DEBUG_PRINT_LOG
 	UE_LOG(LogTemp, Warning, TEXT("Sample Pt Count == %d, Sample Pt : Mesh Vert Ratio == %f"), VolSamplePts.Num(), samp_r);
 	#endif
-	for (int32 sp = 0; sp < VolSamplePts.Num(); ++sp) DrawDebugSphere(world, VolSamplePts[sp]->Position, ParticleRadius * 1.25f, 3, FColor(255, 0, 0, 255), false, 5.0f);
+	//for (int32 sp = 0; sp < VolSamplePts.Num(); ++sp) DrawDebugSphere(world, VolSamplePts[sp]->Position, ParticleRadius * 1.25f, 3, FColor(0, 255, 0, 255), false, 5.0f);
 }
 
 
@@ -633,7 +633,7 @@ void UVerletClothMeshComponent::DBG_ShowParticles() const
 	UWorld *world = GetWorld();
 	for (const FVerletClothParticle &pt : Particles)
 	{
-		DrawDebugSphere(world, pt.Position, ParticleRadius, 3, FColor(255, 0, 0, 1), false, 3.0f);
+		DrawDebugSphere(world, pt.Position, ParticleRadius, 3, FColor(0, 0, 255.0f, 1), false, 3.0f);
 	}
 }
 
