@@ -31,7 +31,7 @@ UVerletClothMeshComponent::UVerletClothMeshComponent(const FObjectInitializer& O
 
 	// SM Init
 	sm = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ClothStaticMesh"));
-
+	TheMaterial = CreateDefaultSubobject<UMaterial>(TEXT("ClothMaterial"));
 	// UPropery Members Init
 	bShowStaticMesh = true;
 	bSimulate = false;
@@ -192,7 +192,7 @@ void UVerletClothMeshComponent::BuildClothState()
 	for (int32 i = 0; i < smData.vert_count; ++i)
 	{
 		// SMesh-ProcMesh Init
-		//smData.Pos[i] = smData.vb->VertexPosition(i); // Pass Verts Without Component Location Offset initally.
+		smData.Pos[i] = smData.vb->VertexPosition(i); // Pass Verts Without Component Location Offset initally.
 		smData.Normal[i] = FVector::UpVector;
 		smData.Tang[i] = FProcMeshTangent(FVector::UpVector, false);
 		smData.has_col == true ?  smData.Col[i] = smData.cvb->VertexColor(i) : smData.Col[i] = FColor(255, 255, 255);
@@ -218,20 +218,45 @@ void UVerletClothMeshComponent::BuildClothState()
 			int32 Index = i * HorizontalVertexCount + j;
 
 			smData.Pos[Index] = InitLocation;
-			//smData.Normal[Index] = FVector::UpVector;
-			FVector vertPtPos = GetComponentLocation() + smData.vb->VertexPosition(i); // Pts With Component Location Offset
-			Particles[i].Position = vertPtPos, Particles[i].PrevPosition = vertPtPos;
-			Particles[i].ID = i;
+			smData.Normal[Index] = FVector::UpVector;
+			smData.Tang[Index] = FProcMeshTangent(FVector::UpVector, false);
+			smData.has_col == true ? smData.Col[Index] = smData.cvb->VertexColor(Index) : smData.Col[Index] = FColor(255, 255, 255);
+			smData.has_uv == true ? smData.UV[Index] = smData.smvb->GetVertexUV(Index, 0) : smData.UV[Index] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
+
+			FVector vertPtPos = GetComponentLocation() + smData.vb->VertexPosition(Index); // Pts With Component Location Offset
+			Particles[Index].Position = vertPtPos, Particles[Index].PrevPosition = vertPtPos;
+			Particles[Index].ID = Index;
+			lod0->bHasColorVertexData == true ? Particles[Index].Col = smData.cvb->VertexColor(Index) : Particles[Index].Col = FColor(255, 255, 255);
 		}
 	}
 	// Indices 
-	for (int32 i = 0; i < smData.ind_count; ++i) smData.Ind[i] = static_cast<int32>(smData.ib->GetIndex(i));
+	//for (int32 i = 0; i < smData.ind_count; ++i) smData.Ind[i] = static_cast<int32>(smData.ib->GetIndex(i));
+	
+	for (int32 Y = 0, Index = 0; Y < VerticalVertexCount - 1; ++Y)
+	{
+		for (int32 X = 0; X < HorizontalVertexCount - 1; ++X)
+		{
+			int A = Y * HorizontalVertexCount + X;
+			int B = A + HorizontalVertexCount;
+			int C = A + HorizontalVertexCount + 1;
+			int D = A + 1;
 
+			smData.Ind[Index++] = A;
+			smData.Ind[Index++] = B;
+			smData.Ind[Index++] = C;
+
+			smData.Ind[Index++] = A;
+			smData.Ind[Index++] = C;
+			smData.Ind[Index++] = D;
+		}
+	}
+	
 	// Build Cloth Mesh Section
 	CreateMeshSection(0, smData.Pos, smData.Ind, smData.Normal, smData.UV, smData.Col, smData.Tang, false);
+	SetMaterial(0, TheMaterial);
 	bShowStaticMesh = false; sm->SetVisibility(bShowStaticMesh);
 	clothStateExists = true;
-
+	
 	// Get Volume Sample Pts, and Calc Orginal Volume.
 	GetVolSamplePts(VolSample_Count);
 	restVolume = CalcClothVolume();

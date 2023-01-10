@@ -54,6 +54,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Static Mesh")
 	UStaticMeshComponent *sm;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Material")
+	UMaterial* TheMaterial;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cloth Simulation")
 	bool bShowStaticMesh;
 
