@@ -156,18 +156,19 @@ void UVerletClothMeshComponent::BuildClothState()
 	if (sm == nullptr) { UE_LOG(LogTemp, Error, TEXT("ERR::VerletCloth::No Static Mesh Set"));  return; }
 	
 	// Store SMLOD0 Buffer Pointers
+	/*
 	FStaticMeshLODResources *lod0 = *(usm->RenderData->LODResources.GetData()); 
 	smData.vb   = &(lod0->VertexBuffers.PositionVertexBuffer); // Pos
 	smData.smvb = &(lod0->VertexBuffers.StaticMeshVertexBuffer); // Static Mesh Buffer
 	smData.cvb  = &(lod0->VertexBuffers.ColorVertexBuffer); // Colour
 	smData.ib   = &(lod0->IndexBuffer); // Tri Inds
-
+	*/
 	smData.vert_count = HorizontalVertexCount * VerticalVertexCount;
 	smData.ind_count = (HorizontalVertexCount - 1) * (VerticalVertexCount - 1) * 6;
 	smData.tri_count = smData.ind_count / 3;
-	particleCount = smData.vert_count;
+	particleCount = HorizontalVertexCount * VerticalVertexCount;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("V: %i, I: %i"), smData.vb->GetNumVertices(), smData.ib->GetNumIndices()));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("V: %i, I: %i"), smData.vb->GetNumVertices(), smData.ib->GetNumIndices()));
 	#ifdef DEBUG_PRINT_LOG
 	UE_LOG(LogTemp, Warning, TEXT("DBG::Static Mesh Vertex Count == %d | Index Count = %d"), smData.vert_count, smData.ind_count);
 	#endif
@@ -185,26 +186,27 @@ void UVerletClothMeshComponent::BuildClothState()
 	// Need to add checks to delete previous procedual mesh data if exists.
 	ClearAllMeshSections();
 
-	smData.has_uv = smData.smvb->GetNumTexCoords() != 0; 
-	smData.has_col = lod0->bHasColorVertexData;
+	smData.has_uv = true;
+	smData.has_col = true;
 	
 	// SmData Buffer --> Array Deserialization.
+	/*
 	for (int32 i = 0; i < smData.vert_count; ++i)
 	{
 		// SMesh-ProcMesh Init
 		smData.Pos[i] = smData.vb->VertexPosition(i); // Pass Verts Without Component Location Offset initally.
 		smData.Normal[i] = FVector::UpVector;
 		smData.Tang[i] = FProcMeshTangent(FVector::UpVector, false);
-		smData.has_col == true ?  smData.Col[i] = smData.cvb->VertexColor(i) : smData.Col[i] = FColor(255, 255, 255);
-		smData.has_uv == true  ?  smData.UV[i] = smData.smvb->GetVertexUV(i, 0) : smData.UV[i] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
+		//smData.has_col == true ?  smData.Col[i] = smData.cvb->VertexColor(i) : smData.Col[i] = FColor(255, 255, 255);
+		//smData.has_uv == true  ?  smData.UV[i] = smData.smvb->GetVertexUV(i, 0) : smData.UV[i] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
 		UWorld* world = GetWorld();
 		// Particle Init
 		FVector vertPtPos = GetComponentLocation() + smData.vb->VertexPosition(i); // Pts With Component Location Offset
 		Particles[i].Position = vertPtPos, Particles[i].PrevPosition = vertPtPos; 
 		Particles[i].ID = i;
-		lod0->bHasColorVertexData == true ? Particles[i].Col = smData.cvb->VertexColor(i) : Particles[i].Col = FColor(255, 255, 255);
+		//lod0->bHasColorVertexData == true ? Particles[i].Col = smData.cvb->VertexColor(i) : Particles[i].Col = FColor(255, 255, 255);
 	}
-
+	*/
 	for (int i = 0; i < HorizontalVertexCount; ++i)
 	{
 		for (int j = 0; j < VerticalVertexCount; ++j)
@@ -220,15 +222,18 @@ void UVerletClothMeshComponent::BuildClothState()
 			smData.Pos[Index] = InitLocation;
 			smData.Normal[Index] = FVector::UpVector;
 			smData.Tang[Index] = FProcMeshTangent(FVector::UpVector, false);
-			smData.has_col == true ? smData.Col[Index] = smData.cvb->VertexColor(Index) : smData.Col[Index] = FColor(255, 255, 255);
-			smData.has_uv == true ? smData.UV[Index] = smData.smvb->GetVertexUV(Index, 0) : smData.UV[Index] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
+			//smData.has_col == true ? smData.Col[Index] = smData.cvb->VertexColor(Index) : smData.Col[Index] = FColor(255, 255, 255);
+			//smData.has_uv == true ? smData.UV[Index] = smData.smvb->GetVertexUV(Index, 0) : smData.UV[Index] = FVector2D(0.0f); // Only support 1 UV Channel fnow.
 
-			FVector vertPtPos = GetComponentLocation() + smData.vb->VertexPosition(Index); // Pts With Component Location Offset
+			FVector vertPtPos = GetComponentLocation() + InitLocation; // Pts With Component Location Offset
 			Particles[Index].Position = vertPtPos, Particles[Index].PrevPosition = vertPtPos;
 			Particles[Index].ID = Index;
-			lod0->bHasColorVertexData == true ? Particles[Index].Col = smData.cvb->VertexColor(Index) : Particles[Index].Col = FColor(255, 255, 255);
+			//lod0->bHasColorVertexData == true ? Particles[Index].Col = smData.cvb->VertexColor(Index) : Particles[Index].Col = FColor(255, 255, 255);
+			UWorld* world = GetWorld();
+			if (Index > 0) DrawDebugLine(world, smData.Pos[Index], smData.Pos[Index - 1], FColor(255, 0, 0), false, 5.0f);
 		}
 	}
+
 	// Indices 
 	//for (int32 i = 0; i < smData.ind_count; ++i) smData.Ind[i] = static_cast<int32>(smData.ib->GetIndex(i));
 	
@@ -250,7 +255,19 @@ void UVerletClothMeshComponent::BuildClothState()
 			smData.Ind[Index++] = D;
 		}
 	}
-	
+
+	for (int32 Y = 0; Y < VerticalVertexCount; ++Y)
+	{
+		for (int32 X = 0; X < HorizontalVertexCount; ++X)
+		{
+			float U = StaticCast<float>(X) / HorizontalVertexCount - 1;
+			float V = StaticCast<float>(Y) / VerticalVertexCount - 1;
+			int32 Index = Y * HorizontalVertexCount + X;
+
+			smData.UV[Index] = FVector2D(U, V);
+		}
+	}
+
 	// Build Cloth Mesh Section
 	CreateMeshSection(0, smData.Pos, smData.Ind, smData.Normal, smData.UV, smData.Col, smData.Tang, false);
 	SetMaterial(0, TheMaterial);
@@ -344,7 +361,7 @@ void UVerletClothMeshComponent::BuildClothConstraints()
 
 	// Clear Previous Constraints
 	Constraints.Empty();
-
+	
 	// For Each Particle(Vert) get triangles i'm a part of,
 	for (int32 p = 0; p < particleCount; ++p)
 	{
@@ -377,6 +394,39 @@ void UVerletClothMeshComponent::BuildClothConstraints()
 			}
 		}
 	}
+	/*
+	ParallelFor(Particles.Num(), [&](int32 p)
+		{
+			FVerletClothParticle& curPt = Particles[p];
+			curPt.conCount = 0;
+
+			// Each Tri im part of,
+			for (int32 t = 0; t < smData.vtris[p].Num(); ++t)
+			{
+				// CurParticle/Vert, CurTri FIntVector. 
+				FIntVector& TriInd = smData.Tris[smData.vtris[p][t]];
+
+				// Each Vert/Particle Index of that Tri
+				for (int32 i = 0; i < 3; ++i)
+				{
+					bool is_copy = false;
+					int32 tvi = TriInd[i];
+					FVerletClothParticle& triPt = Particles[tvi];
+					// First Check if this Constraint Pair (ID) Already Exists to avoid double constraints. 
+					int32 Cur_Tri_conID = curPt.ID * triPt.ID;
+					for (int32 c = 0; c < Constraints.Num(); ++c) if (Constraints[c].conID == Cur_Tri_conID) is_copy = true;
+					// Or If Current Tri Pt, is Self CurPt, avoid self constraints.
+					if (triPt.ID == curPt.ID || is_copy == true) continue;
+					else
+					{
+						// Append New Constraint Of Particle Pair (CurPt and TriPt)
+						Constraints.Emplace(curPt, triPt, this);
+						curPt.conCount++;
+					}
+				}
+			}
+		});
+		*/
 }
 
 // Rebuild Procedual Mesh Section 0, within tick with updated particle attributes if present.
@@ -399,19 +449,35 @@ void UVerletClothMeshComponent::TickUpdateCloth()
 	// Update From Particle Attribs. 
 	if (!smData.has_col)
 	{
+		
 		for (int32 i = 0; i < particleCount; ++i)
 		{
 			UpdtPos[i] = Particles[i].Position - GetComponentLocation(); // Subtract Comp Translation Off as is added to ProcMesh Verts internally. 
 		}
+		/*
+		ParallelFor(Particles.Num(), [&](int32 Index)
+			{
+				UpdtPos[Index] = Particles[Index].Position - GetComponentLocation(); // Subtract Comp Translation Off as is added to ProcMesh Verts internally. 
+			});
+			*/
 		UpdateMeshSection(0, UpdtPos, UpdtNorm, smData.UV, smData.Col, UpdtTang); // No Colour, Use SM Colour. 
 	}
 	else if (smData.has_col)
 	{
+		
 		for (int32 i = 0; i < particleCount; ++i)
 		{
+
 			UpdtPos[i] = Particles[i].Position - GetComponentLocation(); // Subtract Comp Translation Off as is added to ProcMesh Verts internally. 
 			UpdtCol[i] = Particles[i].Col;
 		}
+		/*
+		ParallelFor(Particles.Num(), [&](int32 Index)
+			{
+				UpdtPos[Index] = Particles[Index].Position - GetComponentLocation(); // Subtract Comp Translation Off as is added to ProcMesh Verts internally. 
+				UpdtCol[Index] = Particles[Index].Col;
+			});
+			*/
 		UpdateMeshSection(0, UpdtPos, UpdtNorm, smData.UV, UpdtCol, UpdtTang); // Use Particle Colour --> Vertex Colour. 
 	}
 }
@@ -424,7 +490,7 @@ void UVerletClothMeshComponent::Integrate(float i_St)
 
 	const float SubstepTimeSqr = i_St * i_St;
 	const FVector Gravity = FVector(0, 0, GetWorld()->GetGravityZ()) * ClothGravityScale;
-
+	
 	for (int32 pt = 0; pt < particleCount; pt++)
 	{
 		FVerletClothParticle& Particle = Particles[pt];
@@ -437,6 +503,21 @@ void UVerletClothMeshComponent::Integrate(float i_St)
 		FVector NewPosition = Particle.Position + (Particle.Position - Particle.PrevPosition) + (Accel * SubstepTimeSqr);
 		Particle.PrevPosition = Particle.Position; Particle.Position = NewPosition;
 	}
+	/*
+	ParallelFor(Particles.Num(), [&](int32 Index)
+		{
+			FVerletClothParticle& Particle = Particles[Index];
+
+			// Cloth Accel x''(t) = f/m (+ g) 
+			FVector Accel = Gravity + ((Particle.Force + ClothForce) / ParticleMass);
+
+			// x(n+1) = 2x(n) - x(n-1) + a(x) * dt^2
+			// Integrate x''(n) to x(n+1) = x(n) + (x(n) - x(n-1)) + (a(x) * dt^2)
+			FVector NewPosition = Particle.Position + (Particle.Position - Particle.PrevPosition) + (Accel * SubstepTimeSqr);
+			Particle.PrevPosition = Particle.Position; Particle.Position = NewPosition;
+		});
+		*/
+	
 }
 
 // Cloth Particle and World Collision 
@@ -453,7 +534,7 @@ void UVerletClothMeshComponent::ClothCollisionWorld()
 		FCollisionQueryParams Params(SCENE_QUERY_STAT(VerletClothCollision));
 		ECollisionChannel TraceChannel = GetCollisionObjectType();
 		FCollisionResponseParams ResponseParams(GetCollisionResponseToChannels());
-
+		
 		for (int32 pt = 0; pt < particleCount; ++pt)
 		{
 			FVerletClothParticle &Particle = Particles[pt];
@@ -485,6 +566,39 @@ void UVerletClothMeshComponent::ClothCollisionWorld()
 				}
 			}
 		}
+		/*
+		ParallelFor(Particles.Num(), [&](int32 pt)
+			{
+				FVerletClothParticle& Particle = Particles[pt];
+				//if (bPinTop && Particle.state == 0) continue; // Pinned Pt. 
+				FHitResult Result;
+				bool bHit = World->SweepSingleByChannel(Result, Particle.PrevPosition, Particle.Position, FQuat::Identity, TraceChannel, FCollisionShape::MakeSphere(ParticleRadius), Params, ResponseParams);
+				if (bHit)
+				{
+					if (Result.bStartPenetrating)
+					{
+						Particle.Position += (Result.Normal * Result.PenetrationDepth);
+						world_collided = true;
+					}
+					else
+					{
+						Particle.Position = Result.Location;
+					}
+
+					// Zero out any positive restitution velocity.
+					FVector Delta = Particle.Position - Particle.PrevPosition;
+					float NormalDelta = Delta | Result.Normal;
+					FVector PlaneDelta = Delta - (NormalDelta * Result.Normal);
+					Particle.PrevPosition += (NormalDelta * Result.Normal);
+
+					if (CollisionFriction > 1e-04)
+					{
+						FVector ScaledPlaneDelta = PlaneDelta * CollisionFriction;
+						Particle.PrevPosition += ScaledPlaneDelta;
+					}
+				}
+			});
+			*/
 	}
 }
 
