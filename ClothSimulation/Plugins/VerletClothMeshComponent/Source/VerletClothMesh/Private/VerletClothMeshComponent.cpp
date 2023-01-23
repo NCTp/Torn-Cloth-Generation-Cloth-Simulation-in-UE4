@@ -215,6 +215,11 @@ void UVerletClothMeshComponent::BuildClothState()
 			float LocY = j * VerticalDistance;
 			float LocZ = 0.0f;
 
+			if (i > HorizontalVertexCount - 5)
+				LocY = j * (VerticalDistance - 5.0f);
+				
+
+
 			FVector InitLocation(LocX, LocY, LocZ);
 
 			int32 Index = i * HorizontalVertexCount + j;
@@ -490,7 +495,7 @@ void UVerletClothMeshComponent::Integrate(float i_St)
 
 	const float SubstepTimeSqr = i_St * i_St;
 	const FVector Gravity = FVector(0, 0, GetWorld()->GetGravityZ()) * ClothGravityScale;
-	
+	/*
 	for (int32 pt = 0; pt < particleCount; pt++)
 	{
 		FVerletClothParticle& Particle = Particles[pt];
@@ -503,7 +508,7 @@ void UVerletClothMeshComponent::Integrate(float i_St)
 		FVector NewPosition = Particle.Position + (Particle.Position - Particle.PrevPosition) + (Accel * SubstepTimeSqr);
 		Particle.PrevPosition = Particle.Position; Particle.Position = NewPosition;
 	}
-	/*
+	*/
 	ParallelFor(Particles.Num(), [&](int32 Index)
 		{
 			FVerletClothParticle& Particle = Particles[Index];
@@ -516,7 +521,7 @@ void UVerletClothMeshComponent::Integrate(float i_St)
 			FVector NewPosition = Particle.Position + (Particle.Position - Particle.PrevPosition) + (Accel * SubstepTimeSqr);
 			Particle.PrevPosition = Particle.Position; Particle.Position = NewPosition;
 		});
-		*/
+		
 	
 }
 
