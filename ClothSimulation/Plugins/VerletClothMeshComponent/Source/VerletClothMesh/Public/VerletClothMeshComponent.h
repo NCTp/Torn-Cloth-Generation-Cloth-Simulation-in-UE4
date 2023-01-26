@@ -142,6 +142,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Cloth Geometry")
 		float VerticalDistance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Cloth Geometry")
+		int32 TearingVar;
+
 	// --- Component UFunctions - Cloth Setup ---
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Cloth Simulation")
 	void BuildClothState();
