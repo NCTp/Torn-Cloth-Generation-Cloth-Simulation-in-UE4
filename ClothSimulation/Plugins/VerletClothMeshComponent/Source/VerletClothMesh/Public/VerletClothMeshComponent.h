@@ -54,7 +54,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Static Mesh")
 	UStaticMeshComponent *sm;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Material")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
 	UMaterial* TheMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cloth Simulation")
@@ -141,6 +141,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Cloth Geometry")
 		float VerticalDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Cloth Geometry")
+		float m_randomFactor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Cloth Geometry")
 		int32 TearingVar;
