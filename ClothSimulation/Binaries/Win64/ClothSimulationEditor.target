@@ -28,11 +28,11 @@
 			"Type": "Executable"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/MCloth/Binaries/Win64/UE4Editor-MCloth.dll",
+			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/Binaries/Win64/UE4Editor-VerletClothMesh.dll",
 			"Type": "DynamicLibrary"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/MCloth/Binaries/Win64/UE4Editor-MCloth.pdb",
+			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/Binaries/Win64/UE4Editor-VerletClothMesh.pdb",
 			"Type": "SymbolFile"
 		},
 		{
@@ -42,14 +42,6 @@
 		{
 			"Path": "$(EngineDir)/Plugins/Runtime/ProceduralMeshComponent/Binaries/Win64/UE4Editor-ProceduralMeshComponentEditor.dll",
 			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/Binaries/Win64/UE4Editor-VerletClothMesh.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/Binaries/Win64/UE4Editor-VerletClothMesh.pdb",
-			"Type": "SymbolFile"
 		},
 		{
 			"Path": "$(EngineDir)/Plugins/2D/Paper2D/Binaries/Win64/UE4Editor-Paper2D.dll",
@@ -2256,15 +2248,11 @@
 			"Type": "RequiredResource"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/MCloth/Binaries/Win64/UE4Editor.modules",
+			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/Binaries/Win64/UE4Editor.modules",
 			"Type": "RequiredResource"
 		},
 		{
 			"Path": "$(EngineDir)/Plugins/Runtime/ProceduralMeshComponent/Binaries/Win64/UE4Editor.modules",
-			"Type": "RequiredResource"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/Binaries/Win64/UE4Editor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -2698,15 +2686,11 @@
 			"Type": "UFS"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/MCloth/MCloth.uplugin",
+			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/VerletClothMesh.uplugin",
 			"Type": "UFS"
 		},
 		{
 			"Path": "$(EngineDir)/Plugins/Runtime/ProceduralMeshComponent/ProceduralMeshComponent.uplugin",
-			"Type": "UFS"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/VerletClothMeshComponent/VerletClothMesh.uplugin",
 			"Type": "UFS"
 		},
 		{

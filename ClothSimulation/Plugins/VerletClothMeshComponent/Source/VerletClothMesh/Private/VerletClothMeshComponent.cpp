@@ -207,8 +207,8 @@ void UVerletClothMeshComponent::BuildClothState()
 			*/
 			//float randomFactor = FMath::RandRange(0.0f, 1.0f) * m_randomFactor;
 			float LocX = i * (HorizontalDistance);
-			float LocY = j * (VerticalDistance);
-			float LocZ = 0;
+			float LocY = 0.0f;
+			float LocZ = -j * (VerticalDistance);
 
 			FVector InitLocation(LocX, LocY, LocZ);
 
@@ -235,7 +235,7 @@ void UVerletClothMeshComponent::BuildClothState()
 	
 	for (int32 Y = 0, Index = 0; Y < VerticalVertexCount - 1; ++Y)
 	{
-		int32 randInt = FMath::RandRange(static_cast<float>(HorizontalVertexCount / TearingVar), static_cast<float>(HorizontalVertexCount)); // 파이는 깊이
+		int32 randInt = FMath::RandRange(static_cast<float>(HorizontalVertexCount / TearingVar), static_cast<float>(HorizontalVertexCount - TearingVar)); // 파이는 깊이
 		for (int32 X = 0; X < HorizontalVertexCount-1; ++X)
 		{
 			/*
@@ -253,7 +253,7 @@ void UVerletClothMeshComponent::BuildClothState()
 			smData.Ind[Index++] = D;
 			*/
 			//int32 randInt = FMath::RandRange(0.0f, 15.0f);
-			FVector randomVector = FVector(FMath::RandRange(-8.0f, 0.0f), 0, FMath::RandRange(-8.0f, 0.0f));
+			FVector randomVector = FVector(FMath::RandRange(+8.0f, 0.0f), 0, FMath::RandRange(-8.0f, 0.0f));
 
 		
 			
@@ -266,17 +266,17 @@ void UVerletClothMeshComponent::BuildClothState()
 
 				if (X == randInt - 1)
 				{
-					/*
+					
 					int32 Index2 = Y * VerticalVertexCount + X;
-					int32 Index3 = (Y + 1) * VerticalVertexCount + X;
-					DrawDebugSphere(world, smData.Pos[Index3], 10, 3, FColor(255, 0, 0, 1), false, 30.0f);
+					//int32 Index3 = (Y + 1) * VerticalVertexCount + X;
+					//DrawDebugSphere(world, smData.Pos[Index3], 10, 3, FColor(255, 0, 0, 1), false, 30.0f);
 					//smData.Pos[Index2] = smData.Pos[Index2] + 5 * randomVector;
 					smData.Pos[Index2] = smData.Pos[Index2] + randomVector;
-					smData.Pos[Index3] = smData.Pos[Index3] - randomVector;
+					//smData.Pos[Index3] = smData.Pos[Index3] - randomVector;
 					smData.Ind[Index++] = A;
 					smData.Ind[Index++] = B;
 					smData.Ind[Index++] = C;
-					*/
+
 					
 				}
 				else
